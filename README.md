@@ -97,14 +97,16 @@
    ```
 
 3. DELETE
+
    - views.py
 
-```
-def delete(request, post_id):
-    post = get_object_or_404(Post, pk=post_id)
-    post.delete()
-    return redirect('home')	
-```
+   ```
+   def delete(request, post_id):
+       post = get_object_or_404(Post, pk=post_id)
+       post.delete()
+       return redirect('home')	
+   ```
+
    - urls.py
 
    ```
@@ -112,3 +114,42 @@ def delete(request, post_id):
        path('delete/<int:post_id>/', views.delete, name='delete'),
    ]
    ```
+
+4. pagination
+
+   - views.py
+
+   ```
+   from django.core.paginator import Paginator
+   
+   def home(request):
+       posts = Post.objects
+       post_list = Post.objects.all()
+       paginator = Paginator(post_list, 3)
+       #request된 페이지가 뭔지를 알아내고 ( request페이지를 변수에 담아냄 )
+       page = request.GET.get('page')
+       #request된 페이지를 얻어온 뒤 return 해 준다
+       page = paginator.get_page(page)
+       return render(request, 'blog/home.html', {'posts':posts, 'page':page})
+   ```
+
+   - home.html
+
+   ```
+   {%if page.has_previous%}
+   <a href="?page=1">First</a>
+   <a href="?page={{page.previous_page_number}}">Previous</a>
+   {%endif%}
+   
+   <span>{{page.number}}</span>
+   <span>of</span>
+   <span>{{page.paginator.num_pages}}</span>
+   
+   {%if page.has_next%}
+   <a href="?page={{page.next_page_number}}">Next</a>
+   <a href="?page={{page.paginator.num_pages}}">Last</a>
+   {%endif%}
+   ```
+
+   
+
